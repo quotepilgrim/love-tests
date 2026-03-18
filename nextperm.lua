@@ -1,7 +1,7 @@
 return function(t)
 	local i = #t
 
-	while i > 1 and t[i] < t[i - 1] do
+	while i > 1 and t[i] <= t[i - 1] do
 		i = i - 1
 	end
 
@@ -10,7 +10,7 @@ return function(t)
 	end
 
 	local j = #t
-	while t[j] < t[i - 1] do
+	while t[j] <= t[i - 1] do
 		j = j - 1
 	end
 
