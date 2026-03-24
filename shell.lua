@@ -48,13 +48,14 @@ M.update = function()
 end
 
 M.draw = function()
+	love.graphics.print("points: " .. count)
 	love.graphics.translate(ox, oy)
-	love.graphics.setColor(1, 1, 1, 1)
 	for _, p in ipairs(points) do
 		love.graphics.circle("fill", p.x, p.y, 2)
 	end
 	love.graphics.setColor(0.5, 1, 0, 1)
 	love.graphics.circle("fill", me.x, me.y, 2)
+	love.graphics.setColor(1, 1, 1, 1)
 end
 
 M.mousepressed = function(x, y)
