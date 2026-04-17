@@ -1,4 +1,5 @@
 local shuffle = require("shuffle")
+local combinations = require("combinations")
 
 local cards = {
 	{ 2, "S" },
@@ -208,29 +209,7 @@ local function is_better(a, b)
 	return false
 end
 
-local combs = {
-	{ 1, 2, 3, 4, 5 },
-	{ 1, 2, 3, 4, 6 },
-	{ 1, 2, 3, 4, 7 },
-	{ 1, 2, 3, 5, 6 },
-	{ 1, 2, 3, 5, 7 },
-	{ 1, 2, 3, 6, 7 },
-	{ 1, 2, 4, 5, 6 },
-	{ 1, 2, 4, 5, 7 },
-	{ 1, 2, 4, 6, 7 },
-	{ 1, 2, 5, 6, 7 },
-	{ 1, 3, 4, 5, 6 },
-	{ 1, 3, 4, 5, 7 },
-	{ 1, 3, 4, 6, 7 },
-	{ 1, 3, 5, 6, 7 },
-	{ 1, 4, 5, 6, 7 },
-	{ 2, 3, 4, 5, 6 },
-	{ 2, 3, 4, 5, 7 },
-	{ 2, 3, 4, 6, 7 },
-	{ 2, 3, 5, 6, 7 },
-	{ 2, 4, 5, 6, 7 },
-	{ 3, 4, 5, 6, 7 },
-}
+local combs = combinations(7, 5)
 
 local function find_best(hand)
 	assert(#hand == 7)
@@ -261,7 +240,7 @@ local total = 0
 local losses = 0
 
 local start = love.timer.getTime()
-for _ = 1, 1000 do
+for _ = 1, 100000 do
 	shuffle(cards)
 
 	for i = 1, 7 do
@@ -285,3 +264,7 @@ end
 
 print(total, losses, losses / total)
 print(love.timer.getTime() - start)
+
+for _, t in ipairs(combs) do
+	print(table.concat(t, " "))
+end
