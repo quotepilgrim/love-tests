@@ -82,7 +82,8 @@ local function get_type(hand)
 
 	for i = 2, 5 do
 		if i == 5 and straight and hand[1][1] == 2 and hand[i][1] == 14 then
-		--  pass
+			local ace = table.remove(hand, 5)
+			table.insert(hand, 1, ace)
 		elseif hand[i][1] - hand[i - 1][1] ~= 1 then
 			straight = false
 		end
@@ -260,7 +261,7 @@ local total = 0
 local losses = 0
 
 local start = love.timer.getTime()
-for _ = 1, 1000000 do
+for _ = 1, 1000 do
 	shuffle(cards)
 
 	for i = 1, 7 do
@@ -280,9 +281,6 @@ for _ = 1, 1000000 do
 			losses = losses + 1
 		end
 	end
-
-	table.sort(hands[1], comp)
-	table.sort(hands[2], comp)
 end
 
 print(total, losses, losses / total)
