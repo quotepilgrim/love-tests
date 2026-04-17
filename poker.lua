@@ -264,7 +264,3 @@ end
 
 print(total, losses, losses / total)
 print(love.timer.getTime() - start)
-
-for _, t in ipairs(combs) do
-	print(table.concat(t, " "))
-end
