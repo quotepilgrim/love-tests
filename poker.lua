@@ -68,8 +68,15 @@ local hand_types = {
 	straightflush = 8,
 }
 
-local function comp(a, b)
-	return a[1] == b[1] and a[2] < b[2] or a[1] < b[1]
+local function hand_str(hand)
+	local result = {}
+
+	for _, t in ipairs(hand) do
+		local r, s = unpack(t)
+		table.insert(result, string.format("%2s", r) .. "-" .. s)
+	end
+
+	return table.concat(result, " ")
 end
 
 local function get_type(hand)
@@ -79,23 +86,31 @@ local function get_type(hand)
 	local tri = false
 	local quad = false
 
-	table.sort(hand, comp)
-
-	for i = 2, 5 do
-		if i == 5 and straight and hand[1][1] == 2 and hand[i][1] == 14 then
-			local ace = table.remove(hand, 5)
-			table.insert(hand, 1, ace)
-		elseif hand[i][1] - hand[i - 1][1] ~= 1 then
-			straight = false
-		end
-
-		if hand[i][2] ~= hand[i - 1][2] then
-			flush = false
-		end
-	end
-
 	for _, v in ipairs(hand) do
 		counts[v[1]] = counts[v[1]] and counts[v[1]] + 1 or 1
+	end
+
+	table.sort(hand, function(a, b)
+		if counts[a[1]] == counts[b[1]] then
+			return a[1] == b[1] and a[2] > b[2] or a[1] > b[1]
+		else
+			return counts[a[1]] > counts[b[1]]
+		end
+	end)
+
+	for i = 4, 1, -1 do
+		if hand[i][1] - hand[i + 1][1] ~= 1 then
+			if i == 1 and straight and hand[2][1] == 5 and hand[1][1] == 14 then
+				local ace = table.remove(hand, 1)
+				table.insert(hand, ace)
+			else
+				straight = false
+			end
+		end
+
+		if hand[i][2] ~= hand[i + 1][2] then
+			flush = false
+		end
 	end
 
 	for _, v in pairs(counts) do
@@ -153,57 +168,12 @@ local function is_better(a, b)
 		return false
 	end
 
-	if a_type == hand_types.highcard or a_type == hand_types.straight or a_type == hand_types.straightflush then
-		return a[5][1] > b[5][1]
-	elseif a_type == hand_types.pair or a_type == hand_types.threeofakind or a_type == hand_types.fourofakind then
-		local a_card, b_card
-		for i = 2, 5 do
-			if a[i][1] == a[i - 1][1] then
-				a_card = a[i][1]
-			end
-			if b[i][1] == b[i - 1][1] then
-				b_card = b[i][1]
-			end
+	for i = 1, 5 do
+		if a[i][1] > b[i][1] then
+			return true
+		elseif b[i][1] > a[i][1] then
+			return false
 		end
-		return a_card > b_card
-	elseif a_type == hand_types.twopair then
-		local a_pairs = {}
-		local b_pairs = {}
-		for i = 2, 5 do
-			if a[i][1] == a[i - 1][1] then
-				table.insert(a_pairs, b[i][1])
-			end
-			if b[i][1] == b[i - 1][1] then
-				table.insert(b_pairs, b[i][1])
-			end
-		end
-		return a_pairs[2] == b_pairs[2] and a_pairs[1] > b_pairs[1] or a_pairs[2] > b_pairs[2]
-	elseif a_type == hand_types.flush then
-		for i = 5, 1, -1 do
-			if a[i][1] > b[i][1] then
-				return true
-			end
-		end
-	elseif a_type == hand_types.fullhouse then
-		local a2, a3, b2, b3
-
-		if a[2][1] == a[3][1] then
-			a2 = a[5][1]
-			a3 = a[1][1]
-		else
-			a2 = a[1][1]
-			a3 = a[5][1]
-		end
-
-		if b[2][1] == b[3][1] then
-			b2 = b[5][1]
-			b3 = b[1][1]
-		else
-			b2 = b[1][1]
-			b3 = b[5][1]
-		end
-
-		return a3 == b3 and a2 > b2 or a3 > b3
 	end
 
 	return false
@@ -240,7 +210,7 @@ local total = 0
 local losses = 0
 
 local start = love.timer.getTime()
-for _ = 1, 100000 do
+for _ = 1, 1000000 do
 	shuffle(cards)
 
 	for i = 1, 7 do
