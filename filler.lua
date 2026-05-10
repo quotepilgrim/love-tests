@@ -1,35 +1,23 @@
 local random = love.math.random
+local conf = require("filler.default")
 
-local tokens = {
-	V = { "a", "e", "i", "o", "u" },
-	C = { "p", "t", "k", "f", "s", "b", "d", "g", "v", "z", "n" },
-	C2 = { "p", "t", "k", "b", "d", "g" },
-	N = { "s", "n" },
-	S = { "y", "s", "h" },
-	--
-	B = { "V", "M" },
-	M = { "C V:3", "C V N:2", "M2" },
-	M2 = { "C2 S V", "C2 S V N" },
-	E = { "M", "M C" },
-	--
-	W = { "E", "B M:2", "B M E:2", "V C" },
-}
+local tokens = conf.tokens
+local replace = conf.replace
 
-local replace = {
-	{ "nn", "n" },
-	{ "ss", "sh" },
-	{ "sz", "z" },
-}
+local weights = {}
 
-for _, t in pairs(tokens) do
-	for i = #t, 1, -1 do
-		local token, freq = t[i]:match("(.+):(.+)")
+for k, t in pairs(tokens) do
+	weights[k] = {}
 
-		if freq then
-			table.remove(t, i)
-			for _ = 1, tonumber(freq) do
-				table.insert(t, token)
-			end
+	local cum_weight = 0
+	for i, v in ipairs(t) do
+		local match, weight = v:match("(.+):(.+)")
+		cum_weight = cum_weight + (tonumber(weight) or 1)
+
+		weights[k][i] = cum_weight
+
+		if match then
+			t[i] = match
 		end
 	end
 end
@@ -37,11 +25,25 @@ end
 local function split(s)
 	local result = {}
 
-	for match in s:gmatch("[^%s]+") do
+	for match in s:gmatch("[^+]+") do
 		table.insert(result, match)
 	end
 
 	return result
+end
+
+local function get_random(s)
+	local max_weight = weights[s][#weights[s]]
+
+	local val = love.math.random() * max_weight
+	local weight = 0
+
+	for i = 1, #weights[s] do
+		weight = weights[s][i]
+		if weight >= val then
+			return tokens[s][i]
+		end
+	end
 end
 
 local function word_gen()
@@ -58,7 +60,7 @@ local function word_gen()
 				replaced = true
 				table.remove(word, i)
 
-				local t = split(tokens[v][random(#tokens[v])])
+				local t = split(get_random(v))
 
 				for j = #t, 1, -1 do
 					table.insert(word, i, t[j])
@@ -78,18 +80,29 @@ local function word_gen()
 	return result
 end
 
-local function sentence_gen(min, max)
+local function sentence_gen(min, max, lexicon)
 	min = min or 3
 	max = max or 20
 
 	local count = random(min, max)
 	local sentence = {}
 
-	for i = 1, count do
-		if random() < 0.1 and i < count then
-			table.insert(sentence, word_gen() .. ",")
-		else
-			table.insert(sentence, word_gen())
+	if lexicon then
+		for i = 1, count do
+			local num = math.min(random(#lexicon), random(#lexicon))
+			if random() < 0.1 and i < count then
+				table.insert(sentence, lexicon[num] .. ",")
+			else
+				table.insert(sentence, lexicon[num])
+			end
+		end
+	else
+		for i = 1, count do
+			if random() < 0.1 and i < count then
+				table.insert(sentence, word_gen() .. ",")
+			else
+				table.insert(sentence, word_gen())
+			end
 		end
 	end
 
@@ -99,7 +112,7 @@ local function sentence_gen(min, max)
 end
 
 local text = {}
-for _ = 1, 10 do
+for _ = 1, 20 do
 	table.insert(text, sentence_gen())
 end
 
