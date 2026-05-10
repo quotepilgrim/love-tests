@@ -16,10 +16,11 @@ function frame:draw()
 	local ty = y + tile_size
 
 	while tx < right do
-		while ty < bottom do
-			love.graphics.draw(image, tiles[5], tx, math.min(ty, bottom - tile_size))
+		while ty < bottom - tile_size do
+			love.graphics.draw(image, tiles[5], tx, ty)
 			ty = ty + tile_size
 		end
+		love.graphics.draw(image, tiles[5], tx, bottom - tile_size)
 		tx = tx + tile_size
 		ty = y + tile_size
 	end
