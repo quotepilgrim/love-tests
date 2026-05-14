@@ -15,18 +15,18 @@ function frame:draw()
 	local tx = x + tile_size
 	local ty = y + tile_size
 
-	while tx < right do
+	while tx < right - tile_size do
 		while ty < bottom - tile_size do
 			love.graphics.draw(image, tiles[5], tx, ty)
 			ty = ty + tile_size
 		end
-		love.graphics.draw(image, tiles[5], tx, bottom - tile_size)
 		tx = tx + tile_size
 		ty = y + tile_size
 	end
 
 	tx = x + tile_size
 	while tx < right - tile_size do
+		love.graphics.draw(image, tiles[5], tx, bottom - tile_size)
 		love.graphics.draw(image, tiles[2], tx, y)
 		love.graphics.draw(image, tiles[8], tx, bottom)
 		tx = tx + tile_size
@@ -34,10 +34,13 @@ function frame:draw()
 
 	ty = y + tile_size
 	while ty < bottom - tile_size do
+		love.graphics.draw(image, tiles[5], right - tile_size, ty)
 		love.graphics.draw(image, tiles[4], x, ty)
 		love.graphics.draw(image, tiles[6], right, ty)
 		ty = ty + tile_size
 	end
+
+	love.graphics.draw(image, tiles[5], right - tile_size, bottom - tile_size)
 
 	love.graphics.draw(image, tiles[2], right - tile_size, y)
 	love.graphics.draw(image, tiles[8], right - tile_size, bottom)
@@ -53,6 +56,7 @@ end
 function M.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	frame.image = love.graphics.newImage("assets/textbox.png")
+	frame.image:setWrap("repeat", "repeat")
 	frame.x = 8
 	frame.y = 8
 	frame.w = 128
