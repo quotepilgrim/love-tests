@@ -26,6 +26,8 @@ end
 
 function M.load()
 	love.window.setMode(ww, wh)
+	love.keyboard.setKeyRepeat(true)
+
 	local x_spacing = sw / (x_count - 1)
 	local y_spacing = sh / (y_count - 1)
 	local raw_points = {}
@@ -64,7 +66,7 @@ end
 
 function M.draw()
 	local pts = points_by_distance[distance]
-	love.graphics.print(("%05d: distance = %s, %d points"):format(d_index, distance, #pts))
+	love.graphics.print(("%05d: distance = %s, %d lines"):format(d_index, distance, #pts / 2))
 
 	if cycling then
 		love.graphics.print(("speed: %d/s"):format(speed), 0, wh - 12)
