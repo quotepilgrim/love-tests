@@ -74,9 +74,7 @@ function M.draw()
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.translate(0.5 * w, 0.5 * w)
 
-		for i = 1, #polygon - 2, 2 do
-			love.graphics.line(polygon[i], polygon[i + 1], polygon[i + 2], polygon[i + 3])
-		end
+		love.graphics.line(polygon)
 	end
 end
 

@@ -5,6 +5,19 @@ local tokens = conf.tokens
 local replace = conf.replace
 
 local weights = {}
+local use_lexicon = false
+local count
+
+while #arg > 0 do
+	local a = table.remove(arg, 1)
+	if a == "-l" then
+		if tonumber(arg[1]) then
+			count = tonumber(table.remove(arg, 1))
+		end
+
+		use_lexicon = true
+	end
+end
 
 for k, t in pairs(tokens) do
 	weights[k] = {}
@@ -46,7 +59,12 @@ local function get_random(s)
 	end
 end
 
-local function word_gen()
+local function generate_word(lexicon)
+	if lexicon then
+		local num = math.min(random(#lexicon), random(#lexicon))
+		return lexicon[num]
+	end
+
 	local num = random(#tokens.W)
 	local word = split(tokens.W[num])
 
@@ -73,8 +91,18 @@ local function word_gen()
 
 	local result = table.concat(word)
 
-	for _, rule in ipairs(replace) do
-		result = result:gsub(unpack(rule))
+	if replace then
+		for _ = 1, 1000 do
+			local old = result
+
+			for _, rule in ipairs(replace) do
+				result = result:gsub(unpack(rule))
+			end
+
+			if result == old then
+				break
+			end
+		end
 	end
 
 	return result
@@ -84,25 +112,14 @@ local function sentence_gen(min, max, lexicon)
 	min = min or 3
 	max = max or 20
 
-	local count = random(min, max)
+	local length = random(min, max)
 	local sentence = {}
 
-	if lexicon then
-		for i = 1, count do
-			local num = math.min(random(#lexicon), random(#lexicon))
-			if random() < 0.1 and i < count then
-				table.insert(sentence, lexicon[num] .. ",")
-			else
-				table.insert(sentence, lexicon[num])
-			end
-		end
-	else
-		for i = 1, count do
-			if random() < 0.1 and i < count then
-				table.insert(sentence, word_gen() .. ",")
-			else
-				table.insert(sentence, word_gen())
-			end
+	for i = 1, length do
+		if random() < 0.1 and i < length then
+			table.insert(sentence, generate_word(lexicon) .. ",")
+		else
+			table.insert(sentence, generate_word(lexicon))
 		end
 	end
 
@@ -111,9 +128,18 @@ local function sentence_gen(min, max, lexicon)
 	return table.concat(sentence, " ") .. "."
 end
 
+local lexicon
+
+if use_lexicon then
+	lexicon = {}
+	for _ = 1, (count or 200) do
+		table.insert(lexicon, generate_word())
+	end
+end
+
 local text = {}
 for _ = 1, 20 do
-	table.insert(text, sentence_gen())
+	table.insert(text, sentence_gen(nil, nil, lexicon))
 end
 
 local result = table.concat(text, " ")
