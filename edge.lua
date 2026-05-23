@@ -1,12 +1,22 @@
+local M = {}
+
 local points = {}
-local speed = 2
-local draw_points = true
-local width, height = 500, 500
-local x_count, y_count = 17, 17
 local points_by_distance = {}
+local draw_points = true
+
+local ww, wh = 1000, 1000
+local sw, sh = 960, 960
+local ox, oy = (ww - sw) / 2, (wh - sh) / 2
+local x_count, y_count = 23, 23
+
+local speeds = { 1, 2, 3, 5, 7, 10, 15, 20, 30, 60 }
+local s_index = 2
+local speed = speeds[s_index]
+
 local distances = {}
 local d_index = 1
 local distance
+
 local cycling = false
 local timer = 0
 
@@ -14,11 +24,10 @@ local function dist(x1, y1, x2, y2)
 	return ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) ^ 0.5
 end
 
-local M = {}
-
 function M.load()
-	local x_spacing = width / (x_count - 1)
-	local y_spacing = height / (y_count - 1)
+	love.window.setMode(ww, wh)
+	local x_spacing = sw / (x_count - 1)
+	local y_spacing = sh / (y_count - 1)
 	local raw_points = {}
 
 	for i = 0, x_count - 1 do
@@ -34,7 +43,7 @@ function M.load()
 			local r2 = raw_points[j]
 			local p1 = points[i]
 			local p2 = points[j]
-			local d = ("%.4f"):format(dist(r1[1], r1[2], r2[1], r2[2]))
+			local d = ("%f"):format(dist(r1[1], r1[2], r2[1], r2[2]))
 
 			points_by_distance[d] = points_by_distance[d] or {}
 			table.insert(points_by_distance[d], p1)
@@ -56,11 +65,12 @@ end
 function M.draw()
 	local pts = points_by_distance[distance]
 	love.graphics.print(("%05d: distance = %s, %d points"):format(d_index, distance, #pts))
+
 	if cycling then
-		love.graphics.print(("speed: %.1f/s"):format(speed), 0, 600 - 12)
+		love.graphics.print(("speed: %d/s"):format(speed), 0, wh - 12)
 	end
 
-	love.graphics.translate(150, 50)
+	love.graphics.translate(ox, oy)
 
 	for i = 1, #pts, 2 do
 		local p1 = pts[i]
@@ -69,7 +79,7 @@ function M.draw()
 	end
 
 	if draw_points then
-		love.graphics.setColor(1, 1, 0, 1)
+		love.graphics.setColor(1, 0, 0, 1)
 		love.graphics.setPointSize(2)
 		love.graphics.points(points)
 		love.graphics.setColor(1, 1, 1, 1)
@@ -95,10 +105,12 @@ function M.keypressed(key)
 	elseif key == "delete" then
 		draw_points = not draw_points
 	elseif key == "right" then
-		speed = math.min(64, speed * 2)
+		s_index = math.min(#speeds, s_index + 1)
 	elseif key == "left" then
-		speed = math.max(0.5, speed / 2)
+		s_index = math.max(1, s_index - 1)
 	end
+
+	speed = speeds[s_index]
 
 	if cycling then
 		return
