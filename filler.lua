@@ -2,7 +2,7 @@ local random = love.math.random
 local conf = require("filler.default")
 
 local tokens = conf.tokens
-local replace = conf.replace
+local replacements = conf.replace
 
 local weights = {}
 local use_lexicon = false
@@ -91,11 +91,11 @@ local function generate_word(lexicon)
 
 	local result = table.concat(word)
 
-	if replace then
+	if replacements then
 		for _ = 1, 1000 do
 			local old = result
 
-			for _, rule in ipairs(replace) do
+			for _, rule in ipairs(replacements) do
 				result = result:gsub(unpack(rule))
 			end
 
