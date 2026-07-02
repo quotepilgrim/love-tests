@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 local random = love.math.random
 local conf = require("filler.default")
 

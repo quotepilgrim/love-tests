@@ -4,5 +4,9 @@
   "workspace.library": ["../love2d-luacats"],
   "runtime.special": {
     "love.filesystem.load": "loadfile"
+  },
+  "format.defaultConfig": {
+    "indent_style": "tab",
+    "tab_width": "4"
   }
 }
